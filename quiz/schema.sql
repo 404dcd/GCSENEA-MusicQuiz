@@ -1,0 +1,23 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS cookies;
+
+CREATE TABLE users (
+    userid INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    passwd TEXT NOT NULL,
+    display TEXT,
+    isadmin BOOLEAN
+);
+
+CREATE TABLE songs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artist TEXT NOT NULL,
+    title TEXT NOT NULL
+);
+
+CREATE TABLE cookies (
+    sessionid TEXT UNIQUE NOT NULL,
+    userid INTEGER UNIQUE NOT NULL,
+    expiration INTEGER
+);
