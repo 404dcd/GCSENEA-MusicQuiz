@@ -16,7 +16,7 @@ def valid(checkstr, charset):  # returns True if a non-empty checkstr contains o
     for char in checkstr:
         if char not in charset:
             return False
-    return bool(checkstr)
+    return True
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -28,7 +28,7 @@ def register():
         db = get_db()
 
         errs = []
-        if not valid(username, string.ascii_letters + string.digits + "_"):
+        if not (valid(username, string.ascii_letters + string.digits + "_") and username):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
         elif len(passwd) < 6:
             errs.append("Password must be 6 characters or longer.")
@@ -36,7 +36,7 @@ def register():
             errs.append("Display name is invalid - please use only letters, digits and punctuation")
 
         elif db.execute(
-            "SELECT id FROM user WHERE username = ?", (username,)
+            "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone() is not None:
             errs.append(f"User {username} is already registered.")
 
@@ -44,7 +44,7 @@ def register():
             salt = bcrypt.gensalt()
             hashed = bcrypt.hashpw(passwd.encode("utf-8"), salt)
             db.execute(
-                "INSERT INTO user (username, passwd, display, isadmin) VALUES (?, ?, ?, ?)",
+                "INSERT INTO users (username, passwd, display, isadmin) VALUES (?, ?, ?, ?)",
                 (username, hashed, display, 0)
             )
             db.commit()
@@ -58,18 +58,20 @@ def register():
 
 @bp.route("/login", methods=("GET", "POST"))
 def login():
+    if g.user:
+        return redirect(url_for("auth.register"))
     if request.method == "POST":
         username = request.form["username"]
         passwd = request.form["passwd"]
         db = get_db()
         err = False
         user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
+            "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone()
 
         if user is None:
             err = True
-        elif not bcrypt.checkpw(passwd, user["passwd"]):
+        elif not bcrypt.checkpw(passwd.encode("utf8"), user["passwd"]):
             err = True
 
         if not err:  # user can now be signed in
@@ -77,12 +79,17 @@ def login():
             session.clear()
             session.permanent = True
             session["sessionid"] = token
+            print(token)
+            db.execute(
+                "DELETE FROM cookies WHERE userid = ?", (user["userid"],)  # delete any previous
+            )
             db.execute(
                 "INSERT INTO cookies (sessionid, userid, expiration) VALUES (?, ?, ?)",
                 (token, user["userid"], round(time.time()) + (30 * 60))  # expires after 1/2 hour
             )
+            db.commit()
 
-            return redirect(url_for("index"))
+            return redirect(url_for("auth.register"))
 
         flash("Invalid username or password.", "error")
 
@@ -107,12 +114,24 @@ def load_logged_in_user():
             db.execute(
                 "DELETE FROM cookies WHERE sessionid = ?", (sessionid,)
             )
+            db.commit()
             g.user = None
 
         else:
             g.user = db.execute(
-                "SELECT * FROM users WHERE userid = ", (cookie["userid"],)
+                "SELECT * FROM users WHERE userid = ?", (cookie["userid"],)
             ).fetchone()
 
     if g.user is None and request.endpoint in ("admin", "play", "passwordreset"):
         return redirect(url_for("auth.login"))  # a valid logged in session is required!
+
+
+@bp.route('/logout')
+def logout():
+    db = get_db()
+    db.execute(
+        "DELETE FROM cookies WHERE sessionid = ?", (session["sessionid"],)
+    )
+    db.commit()
+    session.clear()
+    return redirect(url_for("index"))
