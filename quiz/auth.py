@@ -4,7 +4,7 @@ from secrets import token_hex
 import time
 
 from flask import (
-    Blueprint, request, flash, redirect, url_for, render_template, session
+    Blueprint, request, flash, redirect, url_for, render_template, session, g
 )
 
 from quiz.db import get_db
@@ -75,6 +75,7 @@ def login():
         if not err:  # user can now be signed in
             token = token_hex()
             session.clear()
+            session.permanent = True
             session["sessionid"] = token
             db.execute(
                 "INSERT INTO cookies (sessionid, userid, expiration) VALUES (?, ?, ?)",
@@ -86,3 +87,32 @@ def login():
         flash("Invalid username or password.", "error")
 
     return render_template("auth/login.html")
+
+
+@bp.before_app_request
+def load_logged_in_user():
+    sessionid = session.get("sessionid")
+
+    if sessionid is None:
+        g.user = None
+
+    else:
+        db = get_db()
+        cookie = db.execute(
+            "SELECT * FROM cookies WHERE sessionid = ?", (sessionid,)
+        ).fetchone()
+
+        if cookie is None or cookie["expiration"] < time.time():  # expired or not found
+            session.clear()  # clear the bad cookie
+            db.execute(
+                "DELETE FROM cookies WHERE sessionid = ?", (sessionid,)
+            )
+            g.user = None
+
+        else:
+            g.user = db.execute(
+                "SELECT * FROM users WHERE userid = ", (cookie["userid"],)
+            ).fetchone()
+
+    if g.user is None and request.endpoint in ("admin", "play", "passwordreset"):
+        return redirect(url_for("auth.login"))  # a valid logged in session is required!
