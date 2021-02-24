@@ -51,7 +51,7 @@ def init_db():
 def init_db_command():
     """Clear the existing data and create new tables."""
     adminpass = init_db()
-    click.echo("Initialized the database. Admin user was generated with the following credentials:\n")
+    click.echo("Initialized database. Admin user was generated with the following credentials:\n")
     click.echo("Username: admin")
     click.echo(f"Password: {adminpass}\n")
     click.echo("Please consider changing this password by going to the change password page.")

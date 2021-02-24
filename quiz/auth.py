@@ -16,7 +16,7 @@ def valid(checkstr, charset):  # returns True if a non-empty checkstr contains o
     for char in checkstr:
         if char not in charset:
             return False
-    return True
+    return bool(checkstr)
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -28,16 +28,13 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         passwd = request.form["passwd"]
-        display = request.form["display"]
         db = get_db()
 
         errs = []
-        if not (valid(username, string.ascii_letters + string.digits + "_") and username):
+        if not valid(username, string.ascii_letters + string.digits + "_"):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
         elif len(passwd) < 6:
             errs.append("Password must be 6 characters or longer.")
-        elif not valid(display, string.ascii_letters + string.digits + string.punctuation + " "):
-            errs.append("Display name is invalid - please use only letters, digits and punctuation")
 
         elif db.execute(
             "SELECT * FROM users WHERE username = ?", (username,)
@@ -48,8 +45,8 @@ def register():
             salt = bcrypt.gensalt()
             hashed = bcrypt.hashpw(passwd.encode("utf-8"), salt)
             db.execute(
-                "INSERT INTO users (username, passwd, display, isadmin) VALUES (?, ?, ?, ?)",
-                (username, hashed, display, 0)
+                "INSERT INTO users (username, passwd, isadmin) VALUES (?, ?, ?, ?)",
+                (username, hashed, 0)
             )
             db.commit()
             return redirect(url_for("auth.login"))
@@ -138,8 +135,6 @@ def load_logged_in_user():
     if request.endpoint == "admin" and not g.user["isadmin"]:
         flash("You must be an admin to access this page!", "error")
         return redirect(url_for("index.index"))
-
-
 
 
 @bp.route('/logout')
