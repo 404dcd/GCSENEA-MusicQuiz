@@ -79,7 +79,6 @@ def login():
             session.clear()
             session.permanent = True
             session["sessionid"] = token
-            print(token)
             db.execute(
                 "DELETE FROM cookies WHERE userid = ?", (user["userid"],)  # delete any previous
             )
