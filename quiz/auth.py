@@ -21,6 +21,10 @@ def valid(checkstr, charset):  # returns True if a non-empty checkstr contains o
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
+    if g.user:
+        flash("You are already logged in.", "info")
+        return redirect(url_for("index.index"))
+
     if request.method == "POST":
         username = request.form["username"]
         passwd = request.form["passwd"]
@@ -38,7 +42,7 @@ def register():
         elif db.execute(
             "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone() is not None:
-            errs.append(f"User {username} is already registered.")
+            errs.append(f"User '{username}' is already registered.")
 
         if not errs:  # we can now register the user, all data is valid
             salt = bcrypt.gensalt()
@@ -59,7 +63,9 @@ def register():
 @bp.route("/login", methods=("GET", "POST"))
 def login():
     if g.user:
-        return redirect(url_for("auth.register"))
+        flash("You are already logged in.", "info")
+        return redirect(url_for("index.index"))
+
     if request.method == "POST":
         username = request.form["username"]
         passwd = request.form["passwd"]
@@ -88,7 +94,8 @@ def login():
             )
             db.commit()
 
-            return redirect(url_for("auth.register"))
+            flash("Successfully logged in.", "info")
+            return redirect(url_for("index.index"))
 
         flash("Invalid username or password.", "error")
 
@@ -117,12 +124,22 @@ def load_logged_in_user():
             g.user = None
 
         else:
-            g.user = db.execute(
+            usr = db.execute(
                 "SELECT * FROM users WHERE userid = ?", (cookie["userid"],)
             ).fetchone()
+            g.user = {}
+            for attr in ("userid", "username", "isadmin"):
+                g.user[attr] = usr[attr]
 
-    if g.user is None and request.endpoint in ("admin", "play", "passwordreset"):
+    if g.user is None and request.endpoint in ("passwordreset", "admin", "play"):
+        flash("You must be logged in to access this page!", "error")
         return redirect(url_for("auth.login"))  # a valid logged in session is required!
+
+    if request.endpoint == "admin" and not g.user["isadmin"]:
+        flash("You must be an admin to access this page!", "error")
+        return redirect(url_for("index.index"))
+
+
 
 
 @bp.route('/logout')
@@ -133,4 +150,4 @@ def logout():
     )
     db.commit()
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("index.index"))

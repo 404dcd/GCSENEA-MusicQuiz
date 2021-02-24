@@ -24,15 +24,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # test page
-    @app.route("/")
-    def hello():
-        return "Hello, World!"
-
     from . import db
     db.init_app(app)
 
     from . import auth
     app.register_blueprint(auth.bp)
+
+    from . import index
+    app.register_blueprint(index.bp)
 
     return app
