@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint
+    Blueprint, render_template
 )
 
 bp = Blueprint("index", __name__, url_prefix="/")
@@ -7,4 +7,4 @@ bp = Blueprint("index", __name__, url_prefix="/")
 
 @bp.route("/", methods=("GET", "POST"))
 def index():
-    return "You've reached the index page."
+    return render_template("index.html")
