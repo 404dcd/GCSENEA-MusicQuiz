@@ -10,10 +10,11 @@ CREATE TABLE users (
     isadmin BOOLEAN
 );
 
-CREATE TABLE scores (
-    userid INTEGER PRIMARY KEY AUTOINCREMENT,
-    display TEXT,
+CREATE TABLE game (
+    userid INTEGER PRIMARY KEY,
+    display TEXT NOT NULL,
     currscore INTEGER NOT NULL,
+    currsong INTEGER NOT NULL,
     highscore INTEGER NOT NULL
 );
 
@@ -26,5 +27,5 @@ CREATE TABLE songs (
 CREATE TABLE cookies (
     sessionid TEXT UNIQUE NOT NULL,
     userid INTEGER UNIQUE NOT NULL,
-    expiration INTEGER
+    expiration INTEGER NOT NULL
 );
