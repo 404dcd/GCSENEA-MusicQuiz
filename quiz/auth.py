@@ -31,7 +31,7 @@ def register():
         db = get_db()
 
         errs = []
-        if not valid(username, string.ascii_letters + string.digits + "_<>()/"):
+        if not valid(username, string.ascii_letters + string.digits + "_"):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
         elif len(passwd) < 6:
             errs.append("Password must be 6 characters or longer.")
