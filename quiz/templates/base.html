@@ -4,13 +4,14 @@
 <nav>
   <h1>Music Quiz</h1>
   <ul>
-    <li><a href="{{ url_for('index.index') }}">Home</a>
+    <li><a href="{{ url_for('index.index') }}">Home</a></li>
     {% if g.user %}
-      <li><span>{{ g.user["username"] }}</span>
-      <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+      <li><span>{{ g.user["username"] }}</span></li>
+      <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+      <li><a href="{{ url_for('game.play') }}">Play</a></li>
     {% else %}
-      <li><a href="{{ url_for('auth.register') }}">Register</a>
-      <li><a href="{{ url_for('auth.login') }}">Log In</a>
+      <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+      <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
     {% endif %}
   </ul>
 </nav>

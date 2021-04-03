@@ -5,5 +5,13 @@
 {% endblock %}
 
 {% block content %}
-  <p>This is the game page.</p>
+  <p>You're in the game.</p>
+  <h2>Artist: {{ artist }}</h2>
+  <form method="post">
+    {% for word in words %}
+      <label for="w{{word['id']}}">{{word["letter"]}}</label>
+      <input name="w{{word['id']}}" id="word" required>
+    {% endfor %}
+    <input type="submit" value="Guess">
+  </form>
 {% endblock %}

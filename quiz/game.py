@@ -30,24 +30,33 @@ def new_song(db, uid, purge_used=False):
             "UPDATE game SET used = ? WHERE userid = ?", (f"{used},{song}", uid)
         )
     db.commit()
+    return song
 
 
 @bp.route("/play", methods=("GET", "POST"))
-def index():
+def play():
     db = get_db()
 
     if request.method == "POST":
         # User is submitting an answer here
         pass
 
-    if db.execute(
-        "SELECT * FROM game WHERE userid = ?", (g.user["userid"],)
-    ).fetchone() is None:  # Add user to game database on first go
+    songid = db.execute(
+        "SELECT currsong FROM game WHERE userid = ?", (g.user["userid"],)
+    ).fetchone()
+    if songid is None:  # Add user to game database on first go
         db.execute(
             "INSERT INTO game (userid, display, currscore, currsong, attempts, used, highscore) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (g.user["userid"], "", 0, 0, 0, "", 0)
         )
         db.commit()
-        new_song(db, g.user["userid"], purge_used=True)
+        songid = new_song(db, g.user["userid"], purge_used=True)
 
-    return render_template("game.html")
+    song = db.execute(
+        "SELECT * FROM songs WHERE id = ?", (songid,)
+    ).fetchone()
+    words = []
+    c = 0
+    for w in song["title"].split():
+        words.append[{"id": c, "letter": w[0]}]
+    return render_template("game.html", words=words, artist=song["artist"])
