@@ -15,6 +15,8 @@ CREATE TABLE game (
     display TEXT NOT NULL,
     currscore INTEGER NOT NULL,
     currsong INTEGER NOT NULL,
+    attempts INTEGER NOT NULL,
+    used TEXT NOT NULL,
     highscore INTEGER NOT NULL
 );
 
