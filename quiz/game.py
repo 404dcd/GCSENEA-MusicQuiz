@@ -10,11 +10,11 @@ bp = Blueprint("game", __name__, url_prefix="/")
 def new_song(db, uid, purge_used=False):
     used = db.execute(
         "SELECT used FROM game WHERE userid = ?", (uid,)
-    ).fetchone()
+    ).fetchone()["used"]
 
     song = db.execute(
         f"SELECT id FROM songs WHERE id NOT IN ({used}) ORDER BY RANDOM() LIMIT 1"
-    ).fetchone()
+    ).fetchone()["id"]
 
     db.execute(
         "UPDATE game SET currsong = ? WHERE userid = ?", (song, uid)
@@ -38,8 +38,7 @@ def play():
     db = get_db()
 
     if request.method == "POST":
-        # User is submitting an answer here
-        pass
+        new_song(db, g.user["userid"], purge_used=False)
 
     songid = db.execute(
         "SELECT currsong FROM game WHERE userid = ?", (g.user["userid"],)
@@ -51,6 +50,8 @@ def play():
         )
         db.commit()
         songid = new_song(db, g.user["userid"], purge_used=True)
+    else:
+        songid = songid["currsong"]
 
     song = db.execute(
         "SELECT * FROM songs WHERE id = ?", (songid,)
@@ -58,5 +59,5 @@ def play():
     words = []
     c = 0
     for w in song["title"].split():
-        words.append[{"id": c, "letter": w[0]}]
+        words.append({"id": c, "letter": w[0]})
     return render_template("game.html", words=words, artist=song["artist"])
