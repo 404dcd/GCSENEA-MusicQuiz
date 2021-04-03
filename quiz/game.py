@@ -7,18 +7,28 @@ from quiz.db import get_db
 bp = Blueprint("game", __name__, url_prefix="/")
 
 
-def new_song(db, uid):
-    used = map(int, db.execute(
-        "SELECT used FROM songs WHERE userid = ?", (uid,)
-    ).fetchone().split(" "))
+def new_song(db, uid, purge_used=False):
+    used = db.execute(
+        "SELECT used FROM game WHERE userid = ?", (uid,)
+    ).fetchone()
 
     song = db.execute(
-        f"SELECT id FROM songs WHERE id NOT IN ({', '.join(used)}) ORDER BY RANDOM() LIMIT 1"
+        f"SELECT id FROM songs WHERE id NOT IN ({used}) ORDER BY RANDOM() LIMIT 1"
     ).fetchone()
 
     db.execute(
         "UPDATE game SET currsong = ? WHERE userid = ?", (song, uid)
     )
+    db.commit()
+
+    if purge_used:
+        db.execute(
+            "UPDATE game SET used = ? WHERE userid = ?", (str(song), uid)
+        )
+    else:
+        db.execute(
+            "UPDATE game SET used = ? WHERE userid = ?", (f"{used},{song}", uid)
+        )
     db.commit()
 
 
@@ -38,6 +48,6 @@ def index():
             (g.user["userid"], "", 0, 0, 0, "", 0)
         )
         db.commit()
-        new_song(db, g.user["userid"])
+        new_song(db, g.user["userid"], purge_used=True)
 
     return render_template("game.html")
