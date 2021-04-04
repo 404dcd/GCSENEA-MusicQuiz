@@ -9,8 +9,12 @@
   <h2>Artist: {{ artist }}</h2>
   <form method="post">
     {% for word in words %}
-      <label for="w{{word['id']}}">{{word["letter"]}}</label>
-      <input name="w{{word['id']}}" id="word" required>
+      {% if word|length == 1 %}
+        {{word}}
+      {% else %}
+        <label for="w{{loop.index0}}">{{word|first}}</label>
+        <input name="w{{loop.index0}}" id="word">
+      {% endif %}
     {% endfor %}
     <input type="submit" value="Guess">
   </form>
