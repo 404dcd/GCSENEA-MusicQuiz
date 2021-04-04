@@ -38,6 +38,27 @@ def new_song(db, uid, purge_used=False):
     return (song, False)
 
 
+def final_score(db, uid):
+    score = db.execute(
+        "SELECT currscore, highscore FROM game WHERE userid = ?", (uid,)
+    ).fetchone()
+    msg = f"You got {score['currscore']}"
+
+    if score["currscore"] > score["highscore"]:
+        flash(msg + " - your new personal best!")
+        db.execute(
+            "UPDATE game SET highscore = currscore WHERE userid = ?", (uid,)
+        )
+        db.commit()
+    else:
+        flash(msg + ".")
+
+    db.execute(
+        "UPDATE game SET currscore = 0 WHERE userid = ?", (uid,)
+    )
+    db.commit()
+
+
 @bp.route("/play", methods=("GET", "POST"))
 def play():
     db = get_db()
@@ -84,6 +105,7 @@ def play():
 
                 if ranout:
                     flash("You just correctly guessed all songs in the database!")
+                    final_score(db, uid)
                     return redirect(url_for("index.index"))
                 else:
                     flash("Good job, that's correct.")
@@ -97,25 +119,8 @@ def play():
 
             else:  # game over
                 flash(f"The correct title was '{song['title']}'")
-                score = db.execute(
-                    "SELECT currscore, highscore FROM game WHERE userid = ?", (uid,)
-                ).fetchone()
-                msg = f"You got {score['currscore']}"
-
-                if score["currscore"] > score["highscore"]:
-                    flash(msg + " - your new personal best!")
-                    db.execute(
-                        "UPDATE game SET highscore = currscore WHERE userid = ?", (uid,)
-                    )
-                    db.commit()
-                else:
-                    flash(msg + ".")
-
-                db.execute(
-                    "UPDATE game SET currscore = 0 WHERE userid = ?", (uid,)
-                )
-                db.commit()
-                songid = new_song(db, uid, purge_used=True)[0]
+                final_score(db, uid)
+                new_song(db, uid, purge_used=True)
                 return redirect(url_for("index.index"))
 
     song = db.execute(
