@@ -84,7 +84,7 @@ def play():
 
                 if ranout:
                     flash("You just correctly guessed all songs in the database!")
-                    return redirect(url_for("index"))
+                    return redirect(url_for("index.index"))
                 else:
                     flash("Good job, that's correct.")
 
@@ -116,6 +116,7 @@ def play():
                 )
                 db.commit()
                 songid = new_song(db, uid, purge_used=True)[0]
+                return redirect(url_for("index.index"))
 
     song = db.execute(
         "SELECT * FROM songs WHERE id = ?", (songid,)
