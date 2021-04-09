@@ -45,13 +45,13 @@ def final_score(db, uid):
     msg = f"You got {score['currscore']}"
 
     if score["currscore"] > score["highscore"]:
-        flash(msg + " - your new personal best!")
+        flash(msg + " - your new personal best!", "primary")
         db.execute(
             "UPDATE game SET highscore = currscore WHERE userid = ?", (uid,)
         )
         db.commit()
     else:
-        flash(msg + ".")
+        flash(msg + ".", "primary")
 
     db.execute(
         "UPDATE game SET currscore = 0 WHERE userid = ?", (uid,)
@@ -104,21 +104,21 @@ def play():
                 songid, ranout = new_song(db, uid)
 
                 if ranout:
-                    flash("You just correctly guessed all songs in the database!")
+                    flash("You just correctly guessed all songs in the database!", "primary")
                     final_score(db, uid)
                     return redirect(url_for("index.index"))
                 else:
-                    flash("Good job, that's correct.")
+                    flash("Good job, that's correct.", "primary")
 
             elif attempts == 0:  # have another go
                 db.execute(
                     "UPDATE game SET attempts = attempts + 1 WHERE userid = ?", (uid,)
                 )
                 db.commit()
-                flash(f"You entered {count} of {len(request.form)} correctly. Have another go.")
+                flash(f"You entered {count} of {len(request.form)} correctly. Have another go.", "primary")
 
             else:  # game over
-                flash(f"The correct title was '{song['title']}'")
+                flash(f"The correct title was '{song['title']}'", "primary")
                 final_score(db, uid)
                 new_song(db, uid, purge_used=True)
                 return redirect(url_for("index.index"))

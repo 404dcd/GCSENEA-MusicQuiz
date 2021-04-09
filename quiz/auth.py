@@ -27,19 +27,22 @@ def register():
 
     if request.method == "POST":
         username = request.form["username"]
-        passwd = request.form["passwd"]
+        passwd = request.form["passwd1"]
+        passwdcheck = request.form["passwd2"]
         db = get_db()
 
         errs = []
         if not valid(username, string.ascii_letters + string.digits + "_"):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
-        elif len(passwd) < 6:
+        if len(passwd) < 6:
             errs.append("Password must be 6 characters or longer.")
+        if passwd != passwdcheck:
+            errs.append("Passwords do not match.")
 
-        elif db.execute(
+        if db.execute(
             "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone() is not None:
-            errs.append(f"User '{username}' is already registered.")
+            errs.append("That user is already registered.")
 
         if not errs:  # we can now register the user, all data is valid
             salt = bcrypt.gensalt()
@@ -52,7 +55,7 @@ def register():
             return redirect(url_for("auth.login"))
 
         for err in errs:  # send errors to the template
-            flash(err, "error")
+            flash(err, "danger")
 
     return render_template("auth/register.html")
 
@@ -66,6 +69,7 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         passwd = request.form["passwd"]
+        remember = "remember-me" in request.form
         db = get_db()
         err = False
         user = db.execute(
@@ -85,16 +89,20 @@ def login():
             db.execute(
                 "DELETE FROM cookies WHERE userid = ?", (user["userid"],)  # delete any previous
             )
+            expire = 60 * 10
+            if remember:
+                expire = 60 * 60 * 24 * 7
+            print(expire)
             db.execute(
                 "INSERT INTO cookies (sessionid, userid, expiration) VALUES (?, ?, ?)",
-                (token, user["userid"], round(time.time()) + (30 * 60))  # expires after 1/2 hour
+                (token, user["userid"], round(time.time()) + expire)
             )
             db.commit()
 
-            flash("Successfully logged in.", "info")
+            flash("Successfully logged in.", "success")
             return redirect(url_for("index.index"))
 
-        flash("Invalid username or password.", "error")
+        flash("Invalid username or password.", "danger")
 
     return render_template("auth/login.html")
 
@@ -129,16 +137,18 @@ def load_logged_in_user():
                 g.user[attr] = usr[attr]
 
     if g.user is None and request.endpoint in ("passwordreset", "admin", "play"):
-        flash("You must be logged in to access this page!", "error")
+        flash("You must be logged in to access this page!", "danger")
         return redirect(url_for("auth.login"))  # a valid logged in session is required!
 
     if request.endpoint == "admin" and not g.user["isadmin"]:
-        flash("You must be an admin to access this page!", "error")
+        flash("You must be an admin to access this page!", "danger")
         return redirect(url_for("index.index"))
 
 
 @bp.route('/logout')
 def logout():
+    if "sessionid" not in session:
+        return redirect(url_for("index.index"))
     db = get_db()
     db.execute(
         "DELETE FROM cookies WHERE sessionid = ?", (session["sessionid"],)
