@@ -1,27 +1,22 @@
-{% extends "base.html" %}
+{% extends "auth/base.html" %}
 
-{% block header %}
-  <h1>{% block title %}Log In{% endblock %}</h1>
-{% endblock %}
+{% block title %}Log In{% endblock %}
 
-{% block content %}
-  <form method="post" class="form-signin text-center" style="max-width: 330px;margin: auto;">
-    <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+{% block directive %}Enter your details{% endblock %}
 
-    <div class="form-floating">
-      <input type="username" name="username" class="form-control form-start" id="floatingInput" placeholder="username">
-      <label for="floatingInput">Username</label>
-    </div>
-    <div class="form-floating">
-      <input type="password" name="passwd" class="form-control form-end" id="floatingPassword" placeholder="password">
-      <label for="floatingPassword">Password</label>
-    </div>
+{% block forms %}
+<div class="form-floating">
+  <input type="username" name="username" class="form-control form-start" id="floatingInput" placeholder="username">
+  <label for="floatingInput">Username</label>
+</div>
+<div class="form-floating">
+  <input type="password" name="passwd" class="form-control form-end" id="floatingPassword" placeholder="password">
+  <label for="floatingPassword">Password</label>
+</div>
 
-    <div class="checkbox mb-3">
-      <label>
-        <input type="checkbox" name="remember-me" value="yes"> Remember me
-      </label>
-    </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-  </form>
+<div class="checkbox">
+  <label>
+    <input type="checkbox" name="remember-me" value="yes"> Remember me
+  </label>
+</div>
 {% endblock %}

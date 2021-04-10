@@ -1,26 +1,20 @@
-{% extends "base.html" %}
+{% extends "auth/base.html" %}
 
-{% block header %}
-  <h1>{% block title %}Register{% endblock %}</h1>
-{% endblock %}
+{% block title %}Register{% endblock %}
 
-{% block content %}
-  <form method="post" class="form-signin text-center" style="max-width: 330px;margin: auto;">
-    <h1 class="h3 mb-3 fw-normal">Please register</h1>
+{% block directive %}Choose a strong password{% endblock %}
 
-    <div class="form-floating">
-      <input type="username" name="username" class="form-control form-start" id="floatingInput" placeholder="username">
-      <label for="floatingInput">Username</label>
-    </div>
-    <div class="form-floating">
-      <input type="password" name="passwd1" class="form-control form-block" id="floatingPassword" placeholder="password">
-      <label for="floatingPassword">Password</label>
-    </div>
-    <div class="form-floating mb-3">
-      <input type="password" name="passwd2" class="form-control form-end" id="floatingPassword" placeholder="password">
-      <label for="floatingPassword">Repeat Password</label>
-    </div>
-
-    <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
-  </form>
+{% block forms %}
+<div class="form-floating">
+  <input type="username" name="username" class="form-control form-start" id="floatingInput" placeholder="username">
+  <label for="floatingInput">Username</label>
+</div>
+<div class="form-floating">
+  <input type="password" name="passwd1" class="form-control form-block" id="floatingPassword" placeholder="password">
+  <label for="floatingPassword">Password</label>
+</div>
+<div class="form-floating">
+  <input type="password" name="passwd2" class="form-control form-end" id="floatingPassword" placeholder="password">
+  <label for="floatingPassword">Repeat Password</label>
+</div>
 {% endblock %}
