@@ -1,5 +1,19 @@
 {% extends "base.html" %}
 
+{% block style %}
+<style>
+  .input-group-text {
+    padding-right: 0.25rem;
+  }
+  .form-control {
+    padding-left: 0;
+  }
+  .form-control:focus {
+    padding-left: 0.5rem;
+  }
+</style>
+{% endblock%}
+
 {% block header %}
   <h1>{% block title %}Play{% endblock %}</h1>
 {% endblock %}
@@ -7,15 +21,23 @@
 {% block content %}
   <p>You're in the game.</p>
   <h2>Artist: {{ artist }}</h2>
-  <form method="post">
-    {% for word in words %}
-      {% if word|length == 1 %}
-        {{word}}
-      {% else %}
-        <label for="w{{loop.index0}}">{{word|first}}</label>
-        <input name="w{{loop.index0}}" id="word">
-      {% endif %}
-    {% endfor %}
-    <input type="submit" value="Guess">
+  <form method="post" class="mt-5">
+    <div class="row g-3">
+      {% for word in words %}
+        <div class="col-1" style="width: {{'12' if word|length > 1 else '5'}}%">
+          <div class="input-group">
+            {% if word|length == 1 %}
+              <span class="input-group-text" id="basic-addon1" style="padding-right: 0.75rem;">{{word|first}}</span>
+            {% else %}
+              <span class="input-group-text" id="basic-addon1">{{word|first}}</span>
+              <input type="text" class="form-control" name="w{{loop.index0}}">
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+      <div class="col">
+        <button type="submit" class="btn btn-primary">Guess</button>
+      </div>
+    </div>
   </form>
 {% endblock %}

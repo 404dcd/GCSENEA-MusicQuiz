@@ -91,8 +91,8 @@ def login():
             )
             expire = 60 * 10
             if remember:
+                print("Forget me not")
                 expire = 60 * 60 * 24 * 7
-            print(expire)
             db.execute(
                 "INSERT INTO cookies (sessionid, userid, expiration) VALUES (?, ?, ?)",
                 (token, user["userid"], round(time.time()) + expire)
@@ -136,7 +136,7 @@ def load_logged_in_user():
             for attr in ("userid", "username", "isadmin"):
                 g.user[attr] = usr[attr]
 
-    if g.user is None and request.endpoint in ("passwordreset", "admin", "play"):
+    if g.user is None and request.endpoint in ("passwordreset", "admin", "game.play"):
         flash("You must be logged in to access this page!", "danger")
         return redirect(url_for("auth.login"))  # a valid logged in session is required!
 
