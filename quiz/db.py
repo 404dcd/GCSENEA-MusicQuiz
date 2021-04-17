@@ -43,6 +43,15 @@ def init_db():
         ("admin", hashed, 1)
     )
     db.commit()
+
+    for nnn in "abcdefghijklmnopqrstuvwxyz":
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw("passwd".encode("utf-8"), salt)
+        db.execute(
+            "INSERT INTO users (username, passwd, isadmin) VALUES (?, ?, ?)",
+            (nnn, hashed, 1)
+        )
+    db.commit()
     return adminpass
 
 

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block activate_leaderboard %} active {% endblock %}
+
 {% block header %}
   <h1>{% block title %}Leaderboard{% endblock %}</h1>
 {% endblock %}
@@ -14,6 +16,16 @@
     </tr>
   </thead>
   <tbody>
+    {% if insert  %}
+      {% if insert|first < start %}
+        <tr class="table-primary">
+          <th scope="row">{{ insert|first }}</th>
+          <td>{{ g.user["username"] }}</td>
+          <td>{{ insert|last }}</td>
+        </tr>
+      {% endif %}
+    {% endif %}
+
     {% for user in users %}
     <tr class="{{ 'table-primary' if user['userid'] == g.user['userid'] else '' }}">
       <th scope="row">{{ loop.index + start}}</th>
@@ -21,6 +33,16 @@
       <td>{{ user["highscore"] }}</td>
     </tr>
     {% endfor %}
+
+    {% if insert %}
+      {% if insert|first > start %}
+        <tr class="table-primary">
+          <th scope="row">{{ insert|first }}</th>
+          <td>{{ g.user["username"] }}</td>
+          <td>{{ insert|last }}</td>
+        </tr>
+      {% endif %}
+    {% endif %}
   </tbody>
 </table>
 <div class="float-end">

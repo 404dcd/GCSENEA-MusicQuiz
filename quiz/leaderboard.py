@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, render_template, request, g, flash, url_for, redirect
+    Blueprint, render_template, request, g
 )
 
 from quiz.db import get_db
@@ -24,19 +24,44 @@ def leaderboard():
     ).fetchall()
     if len(userssql) < 10:
         advance = False
-        userssql = db.execute(
-            "SELECT userid, highscore FROM game ORDER BY highscore LIMIT 10"
-        ).fetchall()[::-1]
         start = db.execute(
             "SELECT COUNT(*) FROM game"
-        ).fetchone()["COUNT(*)"] - len(userssql)
+        ).fetchone()["COUNT(*)"] - 10
+        userssql = db.execute(
+            "SELECT userid, highscore FROM game ORDER BY highscore DESC LIMIT 10 OFFSET ?",
+            (start,)
+        ).fetchall()
 
     users = []
+    gotuser = False
+    douser = True
+    if g.user is None:
+        douser = False
     for u in userssql:
         name = db.execute(
             "SELECT username FROM users WHERE userid = ?",
             (u["userid"],)
         ).fetchone()
+        if douser:
+            if u["userid"] == g.user["userid"]:
+                gotuser = True
         users.append({"userid": u["userid"], "name": name["username"], "highscore": u["highscore"]})
 
-    return render_template("leaderboard.html", users=users, start=start, advance=advance)
+    insert = None
+    if douser and not gotuser:
+        al = db.execute(
+            "SELECT userid, highscore FROM game ORDER BY highscore DESC"
+        ).fetchall()
+        c = 0
+        found = False
+        hs = 0
+        for uid in al:
+            c += 1
+            if uid["userid"] == g.user["userid"]:
+                hs = uid["highscore"]
+                found = True
+                break
+        if found:
+            insert = (c, hs)
+
+    return render_template("leaderboard.html", users=users, start=start, advance=advance, insert=insert)

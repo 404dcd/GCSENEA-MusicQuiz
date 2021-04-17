@@ -106,7 +106,7 @@ def play():
                 if ranout:
                     flash("You just correctly guessed all songs in the database!", "primary")
                     final_score(db, uid)
-                    return redirect(url_for("index.index"))
+                    return redirect(url_for("leaderboard.leaderboard"))
                 else:
                     flash("Good job, that's correct.", "primary")
 
@@ -121,7 +121,7 @@ def play():
                 flash(f"The correct title was '{song['title']}'", "primary")
                 final_score(db, uid)
                 new_song(db, uid, purge_used=True)
-                return redirect(url_for("index.index"))
+                return redirect(url_for("leaderboard.leaderboard"))
 
     song = db.execute(
         "SELECT * FROM songs WHERE id = ?", (songid,)
