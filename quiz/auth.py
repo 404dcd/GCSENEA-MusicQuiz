@@ -27,16 +27,16 @@ def register():
 
     if request.method == "POST":
         username = request.form["username"]
-        passwd = request.form["passwd1"]
-        passwdcheck = request.form["passwd2"]
+        passwd1 = request.form["passwd1"]
+        passwd2 = request.form["passwd2"]
         db = get_db()
 
         errs = []
         if not valid(username, string.ascii_letters + string.digits + "_"):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
-        if len(passwd) < 6:
+        if len(passwd1) < 6 or len(passwd2) < 6:
             errs.append("Password must be 6 characters or longer.")
-        if passwd != passwdcheck:
+        if passwd1 != passwd2:
             errs.append("Passwords do not match.")
 
         if db.execute(
@@ -46,7 +46,7 @@ def register():
 
         if not errs:  # we can now register the user, all data is valid
             salt = bcrypt.gensalt()
-            hashed = bcrypt.hashpw(passwd.encode("utf-8"), salt)
+            hashed = bcrypt.hashpw(passwd1.encode("utf-8"), salt)
             db.execute(
                 "INSERT INTO users (username, passwd, isadmin) VALUES (?, ?, ?)",
                 (username, hashed, 0)
@@ -58,6 +58,36 @@ def register():
             flash(err, "danger")
 
     return render_template("auth/register.html")
+
+
+@bp.route("/changepw", methods=("GET", "POST"))
+def changepw():
+    if request.method == "POST":
+        passwd1 = request.form["passwd1"]
+        passwd2 = request.form["passwd2"]
+        db = get_db()
+
+        errs = []
+        if len(passwd1) < 6 or len(passwd2) < 6:
+            errs.append("Password must be 6 characters or longer.")
+        if passwd1 != passwd2:
+            errs.append("Passwords do not match.")
+
+        if not errs:  # we can now change passwd
+            salt = bcrypt.gensalt()
+            hashed = bcrypt.hashpw(passwd1.encode("utf-8"), salt)
+            db.execute(
+                "UPDATE users SET passwd = ? WHERE userid = ?",
+                (hashed, g.user["userid"])
+            )
+            db.commit()
+            return redirect(url_for("auth.logout"))
+
+        for err in errs:  # send errors to the template
+            flash(err, "danger")
+
+    return render_template("auth/changepw.html")
+
 
 
 @bp.route("/login", methods=("GET", "POST"))
@@ -91,7 +121,6 @@ def login():
             )
             expire = 60 * 10
             if remember:
-                print("Forget me not")
                 expire = 60 * 60 * 24 * 7
             db.execute(
                 "INSERT INTO cookies (sessionid, userid, expiration) VALUES (?, ?, ?)",

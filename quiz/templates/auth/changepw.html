@@ -1,0 +1,16 @@
+{% extends "auth/base.html" %}
+
+{% block title %}Change Password{% endblock %}
+
+{% block directive %}Update your password{% endblock %}
+
+{% block forms %}
+<div class="form-floating">
+  <input type="password" name="passwd1" class="form-control form-start" id="floatingPassword" placeholder="password">
+  <label for="floatingPassword">Password</label>
+</div>
+<div class="form-floating">
+  <input type="password" name="passwd2" class="form-control form-end" id="floatingPassword" placeholder="password">
+  <label for="floatingPassword">Repeat Password</label>
+</div>
+{% endblock %}
