@@ -12,7 +12,6 @@ CREATE TABLE users (
 
 CREATE TABLE game (
     userid INTEGER PRIMARY KEY,
-    display TEXT NOT NULL,
     currscore INTEGER NOT NULL,
     currsong INTEGER NOT NULL,
     attempts INTEGER NOT NULL,

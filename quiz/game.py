@@ -70,8 +70,8 @@ def play():
 
     if songrecord is None:  # Add user to game database on first go
         db.execute(
-            "INSERT INTO game (userid, display, currscore, currsong, attempts, used, highscore) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (uid, "", 0, 0, 0, "", 0)
+            "INSERT INTO game (userid, currscore, currsong, attempts, used, highscore) VALUES (?, ?, ?, ?, ?, ?)",
+            (uid, 0, 0, 0, "", 0)
         )
         db.commit()
         songid = new_song(db, uid, purge_used=True)[0]
