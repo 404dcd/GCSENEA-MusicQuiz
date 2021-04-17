@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header %}
+  <h1>{% block title %}Leaderboard{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Rank</th>
+      <th scope="col">Username</th>
+      <th scope="col">High score</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr class="{{ 'table-primary' if user['userid'] == g.user['userid'] else '' }}">
+      <th scope="row">{{ loop.index + start}}</th>
+      <td>{{ user["name"] }}</td>
+      <td>{{ user["highscore"] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div class="float-end">
+  {% if start == 0 %}
+  <a class="btn btn-primary disabled" role="button">Previous</a>
+  {% else %}
+  <a class="btn btn-primary" href="{{url_for('leaderboard.leaderboard')}}?page={{request.args.get('page',0)|int-1}}" role="button">Previous</a>
+  {% endif %}
+  {% if advance %}
+  <a class="btn btn-primary" href="{{url_for('leaderboard.leaderboard')}}?page={{request.args.get('page',0)|int+1}}" role="button">Next</a>
+  {% else %}
+  <a class="btn btn-primary disabled" role="button">Next</a>
+  {% endif %}
+</div>
+{% endblock %}
