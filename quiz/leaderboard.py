@@ -27,6 +27,7 @@ def leaderboard():
         start = db.execute(
             "SELECT COUNT(*) FROM game"
         ).fetchone()["COUNT(*)"] - 10
+        start = max(start, 0)
         userssql = db.execute(
             "SELECT userid, highscore FROM game ORDER BY highscore DESC LIMIT 10 OFFSET ?",
             (start,)

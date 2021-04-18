@@ -24,19 +24,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import db
+    from . import db, auth, game, index, leaderboard, admin
     db.init_app(app)
 
-    from . import auth
     app.register_blueprint(auth.bp)
-
-    from . import game
     app.register_blueprint(game.bp)
-
-    from . import index
     app.register_blueprint(index.bp)
-
-    from . import leaderboard
     app.register_blueprint(leaderboard.bp)
+    app.register_blueprint(admin.bp)
 
     return app

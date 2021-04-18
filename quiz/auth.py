@@ -19,6 +19,13 @@ def valid(checkstr, charset):  # returns True if a non-empty checkstr contains o
     return bool(checkstr)
 
 
+def checkep(ep):
+    if ep:
+        if "." in ep and ep.split(".")[0] == "admin":
+            return True
+    return False
+
+
 @bp.route("/register", methods=("GET", "POST"))
 def register():
     if g.user:
@@ -165,11 +172,12 @@ def load_logged_in_user():
             for attr in ("userid", "username", "isadmin"):
                 g.user[attr] = usr[attr]
 
-    if g.user is None and request.endpoint in ("passwordreset", "admin", "game.play"):
-        flash("You must be logged in to access this page!", "danger")
-        return redirect(url_for("auth.login"))  # a valid logged in session is required!
+    if g.user is None:
+        if request.endpoint in ("auth.changepw", "game.play") or checkep(request.endpoint):
+            flash("You must be logged in to access this page!", "danger")
+            return redirect(url_for("auth.login"))  # a valid logged in session is required!
 
-    if request.endpoint == "admin" and not g.user["isadmin"]:
+    elif checkep(request.endpoint) and not g.user["isadmin"]:
         flash("You must be an admin to access this page!", "danger")
         return redirect(url_for("index.index"))
 

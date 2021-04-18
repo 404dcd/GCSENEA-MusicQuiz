@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block header %}
+  <h1>{% block title %}Song Database{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">ID number</th>
+      <th scope="col">Title</th>
+      <th scope="col">Artist</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for song in songs %}
+    <tr>
+      <th scope="row">{{ song["id"] }}</th>
+      <td>{{ song["title"] }}</td>
+      <td>{{ song["artist"] }}</td>
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSongs">
+    Add songs
+  </button>
+  
+  <div class="modal fade" id="addSongs" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <form>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addSongsLabel">Enter songs to be added</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="input-here">
+            <div class="row mb-2">
+              <div class="col">
+                <input type="text" class="form-control" placeholder="Song Title">
+              </div>
+              <div class="col">
+                <input type="text" class="form-control" placeholder="Artist">
+              </div>
+            </div>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" type="submit">Save changes</button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+
+<div class="float-end">
+  {% if start == 0 %}
+  <a class="btn btn-primary me-2 disabled" role="button">Previous</a>
+  {% else %}
+  <a class="btn btn-primary me-2" href="{{url_for('admin.songs')}}?page={{request.args.get('page',0)|int-1}}" role="button">Previous</a>
+  {% endif %}
+  {% if advance %}
+  <a class="btn btn-primary" href="{{url_for('admin.songs')}}?page={{request.args.get('page',0)|int+1}}" role="button">Next</a>
+  {% else %}
+  <a class="btn btn-primary disabled" role="button">Next</a>
+  {% endif %}
+</div>
+
+<script>
+const form = document.getElementById("input-here");
+
+const startingInputs = document.querySelectorAll("#input-here input")
+
+let bottomRow = [...startingInputs];
+
+const stringToHTML = (str) => {
+    const dom = document.createElement("div");
+    dom.innerHTML = str;
+    return dom.children[0];
+}
+
+const addRowIfNecessary = (event) => {
+    const editedRow = event.currentTarget.parentElement.parentElement
+    const editedRowInputs = editedRow.querySelectorAll("input");
+    if ([...editedRowInputs].every(input => input.value === "" && !bottomRow.includes(input))) {
+        editedRow.remove();
+    }
+
+    if (!bottomRow.includes(event.currentTarget)) return;
+
+    const newRow = form.appendChild(stringToHTML('<div class="row mb-2"> </div>'));
+    const newSongTitle = newRow.appendChild(stringToHTML('<div class="col"><input type="text" class="form-control" placeholder="Song Title"></div>'));
+    const newTitleInput = newSongTitle.children[0];
+    newTitleInput.addEventListener("keyup", addRowIfNecessary);
+
+    const newSongArtist = newRow.appendChild(stringToHTML('<div class="col"><input type="text" class="form-control" placeholder="Artist"></div>'));
+    const newArtistInput = newSongArtist.children[0];
+    newArtistInput.addEventListener("keyup", addRowIfNecessary);
+
+    bottomRow = [newTitleInput, newArtistInput];
+}
+
+startingInputs.forEach(input=>{
+    input.addEventListener("keyup", addRowIfNecessary)
+})
+</script>
+{% endblock %}

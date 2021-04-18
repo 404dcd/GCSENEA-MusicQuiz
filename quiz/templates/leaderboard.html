@@ -47,9 +47,9 @@
 </table>
 <div class="float-end">
   {% if start == 0 %}
-  <a class="btn btn-primary disabled" role="button">Previous</a>
+  <a class="btn btn-primary me-2 disabled" role="button">Previous</a>
   {% else %}
-  <a class="btn btn-primary" href="{{url_for('leaderboard.leaderboard')}}?page={{request.args.get('page',0)|int-1}}" role="button">Previous</a>
+  <a class="btn btn-primary me-2" href="{{url_for('leaderboard.leaderboard')}}?page={{request.args.get('page',0)|int-1}}" role="button">Previous</a>
   {% endif %}
   {% if advance %}
   <a class="btn btn-primary" href="{{url_for('leaderboard.leaderboard')}}?page={{request.args.get('page',0)|int+1}}" role="button">Next</a>
