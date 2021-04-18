@@ -39,19 +39,15 @@ def init_db():
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(adminpass.encode("utf-8"), salt)
     db.execute(
-        "INSERT INTO users (username, passwd, isadmin) VALUES (?, ?, ?)",
-        ("admin", hashed, 1)
+        "INSERT INTO users (userid, username, passwd, isadmin) VALUES (?, ?, ?, ?)",
+        (0, "admin", hashed, 1)
+    )
+    db.commit()
+    db.execute(
+        'INSERT INTO songs (artist, title) VALUES ("Ed Sheeran", "Shape Of You")'
     )
     db.commit()
 
-    for nnn in "abcdefghijklmnopqrstuvwxyz":
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw("passwd".encode("utf-8"), salt)
-        db.execute(
-            "INSERT INTO users (username, passwd, isadmin) VALUES (?, ?, ?)",
-            (nnn, hashed, 1)
-        )
-    db.commit()
     return adminpass
 
 

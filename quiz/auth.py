@@ -147,10 +147,9 @@ def login():
 def load_logged_in_user():
     sessionid = session.get("sessionid")
 
-    if sessionid is None:
-        g.user = None
+    g.user = None
 
-    else:
+    if sessionid is not None:
         db = get_db()
         cookie = db.execute(
             "SELECT * FROM cookies WHERE sessionid = ?", (sessionid,)
@@ -162,15 +161,15 @@ def load_logged_in_user():
                 "DELETE FROM cookies WHERE sessionid = ?", (sessionid,)
             )
             db.commit()
-            g.user = None
 
         else:
             usr = db.execute(
                 "SELECT * FROM users WHERE userid = ?", (cookie["userid"],)
             ).fetchone()
-            g.user = {}
-            for attr in ("userid", "username", "isadmin"):
-                g.user[attr] = usr[attr]
+            if usr is not None:
+                g.user = {}
+                for attr in ("userid", "username", "isadmin"):
+                    g.user[attr] = usr[attr]
 
     if g.user is None:
         if request.endpoint in ("auth.changepw", "game.play") or checkep(request.endpoint):

@@ -21,8 +21,8 @@ CREATE TABLE game (
 
 CREATE TABLE songs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    artist TEXT NOT NULL,
-    title TEXT NOT NULL
+    title TEXT NOT NULL,
+    artist TEXT NOT NULL
 );
 
 CREATE TABLE cookies (
@@ -30,7 +30,3 @@ CREATE TABLE cookies (
     userid INTEGER UNIQUE NOT NULL,
     expiration INTEGER NOT NULL
 );
-
-INSERT INTO songs (artist, title) VALUES ("Test Artist 1", "Foo Bar");
-INSERT INTO songs (artist, title) VALUES ("Test Artist 2", "This Is A Test Song");
-INSERT INTO songs (artist, title) VALUES ("Test Artist 3", "One Two Three");

@@ -21,8 +21,10 @@
 {% endblock %}
 
 {% block content %}
-  <p>You're in the game.</p>
-  <h2>Artist: {{ artist }}</h2>
+  <p>You're in the game! The artist name is displayed below, now try to guess the song name given only the first letter of each word. Don't worry about any punctuation or capitalisation, just get the letters right.</p>
+  <br>
+  <h2>Artist:</h2>
+  <h1 class="display-3">{{artist}}</h1>
   <form method="post" class="mt-5">
     <div class="row g-3">
       {% for word in words %}

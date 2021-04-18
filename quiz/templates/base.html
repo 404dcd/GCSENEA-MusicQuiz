@@ -31,9 +31,6 @@
               <li class="nav-item me-1">
                 <a class="nav-link {% block activate_changepw %}{% endblock %}" href="{{ url_for('auth.changepw') }}">Change Password</a>
               </li>
-              <li class="nav-item me-1">
-                <a class="nav-link" href="{{ url_for('auth.logout') }}">Log Out</a>
-              </li>
             {% else %}
               <li class="nav-item me-1">
                 <a class="nav-link {% block activate_register %}{% endblock %}" href="{{ url_for('auth.register') }}">Register</a>
@@ -42,11 +39,22 @@
                 <a class="nav-link {% block activate_login %}{% endblock %}" href="{{ url_for('auth.login') }}">Log In</a>
               </li>
             {% endif %}
+            {% if g.user["isadmin"] %}
+              <li class="nav-item me-1">
+                <a class="nav-link {% block activate_songs %}{% endblock %} btn btn-outline-danger " href="{{ url_for('admin.songs') }}">Song Database</a>
+              </li>
+              <li class="nav-item me-1">
+                <a class="nav-link {% block activate_users %}{% endblock %} btn btn-outline-danger " href="{{ url_for('admin.users') }}">User Database</a>
+              </li>
+            {% endif %}
           </ul>
           {% if g.user %}
-            <span class="navbar-text">
-              {{ g.user["username"] }}
-            </span>
+          <span class="navbar-nav me-3 nav-item">
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">Log Out</a>
+          </span>
+          <span class="btn btn-outline-secondary" style="pointer-events: none;">
+            {{ g.user["username"] }}
+          </span>
           {% endif %}
         </div>
       </div>

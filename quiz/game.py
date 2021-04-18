@@ -59,6 +59,30 @@ def final_score(db, uid):
     db.commit()
 
 
+def titleToArray(title):
+    ws = []
+    for w in title.split():
+        if w[0] == "(":
+            ws.append("(")
+            w = w[1:]
+        if w[-1] == ")":
+            ws.append(w[:-1])
+            ws.append(")")
+        else:
+            ws.append(w)
+    return ws
+
+
+ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+
+def filterChars(string):
+    ret = ""
+    for c in string.lower().strip():
+        if c in ALPHABET:
+            ret += c
+    return ret
+
 @bp.route("/play", methods=("GET", "POST"))
 def play():
     db = get_db()
@@ -82,12 +106,18 @@ def play():
             "SELECT title FROM songs WHERE id = ?", (songid,)
         ).fetchone()
 
+        if song is None:  # song database was changed between requests, probably safe to start over
+            songid = new_song(db, uid, purge_used=True)[0]
+            song = db.execute(
+                "SELECT title FROM songs WHERE id = ?", (songid,)
+            ).fetchone()
+
         if request.method == "POST":
-            words = song["title"].split()
+            words = titleToArray(song["title"])
             count = 0
             for wid, word in request.form.items():
                 correct = words[int(wid[1:])][1:]
-                if word.lower().strip() == correct:
+                if filterChars(word) == filterChars(correct):
                     count += 1
 
             attempts = db.execute(
@@ -126,4 +156,4 @@ def play():
     song = db.execute(
         "SELECT * FROM songs WHERE id = ?", (songid,)
     ).fetchone()
-    return render_template("game.html", words=song["title"].split(), artist=song["artist"])
+    return render_template("game.html", words=titleToArray(song["title"]), artist=song["artist"])
