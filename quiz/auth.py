@@ -41,6 +41,8 @@ def register():
         errs = []
         if not valid(username, string.ascii_letters + string.digits + "_"):
             errs.append("Username is invalid - please use only letters, numbers and underscores")
+        if len(username) > 24:
+            errs.append("Username must be a maximum of 24 characters long.")
         if len(passwd1) < 6 or len(passwd2) < 6:
             errs.append("Password must be 6 characters or longer.")
         if passwd1 != passwd2:
